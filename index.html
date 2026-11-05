@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07101f">
+  <title>Speed-Code — Code Fast. Race Faster.</title>
+  <style>
+    :root {
+      --bg: #050913;
+      --panel: rgba(13, 24, 43, .92);
+      --panel-2: #0b1629;
+      --text: #f5f9ff;
+      --muted: #8fa3bd;
+      --blue: #1ac8ff;
+      --blue-soft: rgba(26, 200, 255, .18);
+      --orange: #ff8a1f;
+      --orange-soft: rgba(255, 138, 31, .18);
+      --green: #55f09a;
+      --red: #ff5374;
+      --border: rgba(148, 184, 220, .18);
+      --shadow: 0 24px 70px rgba(0, 0, 0, .45);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(26, 200, 255, .12), transparent 28rem),
+        radial-gradient(circle at 92% 80%, rgba(255, 138, 31, .1), transparent 30rem),
+        linear-gradient(155deg, #07101f, #03060d 70%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .22;
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(to bottom, black, transparent 85%);
+    }
+
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid rgba(26, 200, 255, .42);
+      outline-offset: 3px;
+    }
+    [hidden] { display: none !important; }
+
+    .app { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 40px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+    .brand { display: flex; align-items: center; gap: 11px; letter-spacing: .12em; font-weight: 1000; font-style: italic; }
+    .brand-mark { width: 34px; height: 20px; border: 4px solid var(--blue); transform: skewX(-18deg); box-shadow: 0 0 16px var(--blue); }
+    .brand em { color: var(--blue); font-style: inherit; }
+    .sound-button { border: 1px solid var(--border); border-radius: 999px; background: rgba(255,255,255,.05); padding: 9px 14px; cursor: pointer; }
+    .sound-button:hover { background: rgba(255,255,255,.1); }
+
+    .screen { animation: appear .32s ease both; }
+    @keyframes appear { from { opacity: 0; transform: translateY(8px); } }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow); backdrop-filter: blur(15px); }
+
+    .menu { min-height: calc(100vh - 130px); display: grid; place-items: center; }
+    .menu-card { width: min(940px, 100%); padding: clamp(26px, 5vw, 58px); position: relative; overflow: hidden; }
+    .menu-card::after { content: ""; position: absolute; width: 280px; height: 280px; border: 45px solid rgba(26,200,255,.05); border-radius: 50%; right: -100px; top: -120px; }
+    .eyebrow { color: var(--blue); font-size: .74rem; font-weight: 900; letter-spacing: .25em; text-transform: uppercase; }
+    h1 { margin: 8px 0 0; font-size: clamp(3rem, 9vw, 7rem); line-height: .85; letter-spacing: -.07em; font-style: italic; font-weight: 1000; text-shadow: 0 0 34px rgba(26,200,255,.28); }
+    .tagline { margin: 20px 0 34px; color: var(--muted); font-size: clamp(1rem, 2vw, 1.35rem); }
+    .setup-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 17px; position: relative; z-index: 1; }
+    .field label { display: block; margin-bottom: 8px; color: #c4d2e3; font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 800; }
+    .field input, .field select { width: 100%; min-height: 52px; padding: 0 15px; color: var(--text); border: 1px solid var(--border); border-radius: 12px; background: #081323; }
+    .field input:hover, .field select:hover { border-color: rgba(26,200,255,.45); }
+    .field.p1 input { border-left: 3px solid var(--blue); }
+    .field.p2 input { border-left: 3px solid var(--orange); }
+    .start-button, .primary-button { border: 0; border-radius: 12px; background: linear-gradient(110deg, #06aee8, #21d7ff); color: #00101a; font-weight: 1000; text-transform: uppercase; letter-spacing: .06em; cursor: pointer; box-shadow: 0 8px 30px rgba(26,200,255,.25); transition: transform .15s, box-shadow .15s; }
+    .start-button { min-height: 58px; grid-column: 1 / -1; margin-top: 5px; }
+    .start-button:hover, .primary-button:hover { transform: translateY(-2px); box-shadow: 0 12px 38px rgba(26,200,255,.38); }
+    .rules { position: relative; z-index: 1; display: flex; gap: 12px; align-items: flex-start; margin-top: 25px; padding: 15px 17px; color: var(--muted); background: rgba(255,255,255,.035); border: 1px solid var(--border); border-radius: 12px; line-height: 1.55; font-size: .9rem; }
+    .rules strong { color: var(--text); }
+
+    .game-header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; margin-bottom: 14px; }
+    .round-label { font-weight: 1000; font-size: clamp(1.45rem, 3vw, 2.2rem); letter-spacing: -.03em; }
+    .phase-label { color: var(--muted); font-size: .85rem; text-align: right; }
+    .raceway { padding: 17px; margin-bottom: 18px; display: grid; gap: 12px; }
+    .lane { --accent: var(--blue); display: grid; grid-template-columns: 150px 1fr; min-height: 114px; border-radius: 16px; border: 1px solid var(--border); background: linear-gradient(90deg, rgba(26,200,255,.08), rgba(255,255,255,.025)); overflow: hidden; }
+    .lane.p2 { --accent: var(--orange); background: linear-gradient(90deg, rgba(255,138,31,.08), rgba(255,255,255,.025)); }
+    .driver { padding: 15px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); }
+    .driver-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 900; font-size: 1.02rem; }
+    .driver-stats { margin-top: 7px; color: var(--muted); font-size: .76rem; line-height: 1.55; }
+    .driver-stats strong { color: var(--accent); }
+    .track { position: relative; min-width: 0; overflow: hidden; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), rgba(255,255,255,.05) 10%); }
+    .track::before, .track::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 16px, transparent 16px 31px); }
+    .track::before { top: 20px; } .track::after { bottom: 20px; }
+    .finish { position: absolute; z-index: 1; right: 12px; top: 0; bottom: 0; width: 19px; opacity: .75; background: conic-gradient(#fff 25%, #111 0 50%, #fff 0 75%, #111 0) 0 0 / 12px 12px; }
+    .car { position: absolute; z-index: 2; left: 0; top: 50%; width: 62px; height: 30px; transform: translate(7px, -50%); transition: left .9s cubic-bezier(.16,.8,.22,1); filter: drop-shadow(0 0 10px var(--accent)); }
+    .car-body { position: absolute; inset: 7px 5px 5px; background: var(--accent); clip-path: polygon(0 42%, 18% 42%, 32% 0, 72% 0, 85% 42%, 100% 53%, 96% 86%, 5% 86%); }
+    .car-window { position: absolute; z-index: 1; left: 27px; top: 9px; width: 18px; height: 7px; background: #dff9ff; clip-path: polygon(22% 0, 80% 0, 100% 100%, 0 100%); }
+    .wheel { position: absolute; z-index: 2; bottom: 1px; width: 10px; height: 10px; border: 3px solid #02050a; border-radius: 50%; background: #b9c7d6; }
+    .wheel.one { left: 12px; } .wheel.two { right: 10px; }
+    .car.turbo::after { content: ""; position: absolute; left: -22px; top: 13px; width: 28px; height: 7px; background: linear-gradient(90deg, transparent, #fff, var(--accent)); clip-path: polygon(0 50%, 100% 0, 100% 100%); animation: flame .18s 5 alternate; }
+    @keyframes flame { to { transform: scaleX(.45); opacity: .5; } }
+
+    .play-panel { min-height: 400px; padding: clamp(20px, 4vw, 38px); }
+    .ready-view { min-height: 330px; display: grid; place-items: center; text-align: center; }
+    .ready-icon { width: 74px; height: 74px; display: grid; place-items: center; margin: auto; border: 2px solid var(--active-color, var(--blue)); border-radius: 50%; color: var(--active-color, var(--blue)); font-size: 2rem; box-shadow: 0 0 30px color-mix(in srgb, var(--active-color, var(--blue)) 30%, transparent); }
+    .ready-view h2 { margin: 19px 0 7px; font-size: clamp(1.9rem, 5vw, 3rem); }
+    .ready-view p { margin: 0 auto 24px; color: var(--muted); max-width: 480px; line-height: 1.55; }
+    .primary-button { min-width: 180px; min-height: 52px; padding: 0 22px; }
+    .secondary-button { min-height: 48px; padding: 0 20px; color: var(--text); border: 1px solid var(--border); border-radius: 12px; background: rgba(255,255,255,.06); font-weight: 800; cursor: pointer; }
+    .secondary-button:hover { background: rgba(255,255,255,.11); }
+
+    .question-top { display: flex; gap: 18px; justify-content: space-between; align-items: flex-start; margin-bottom: 17px; }
+    .question-meta { color: var(--active-color, var(--blue)); text-transform: uppercase; letter-spacing: .14em; font-size: .72rem; font-weight: 900; }
+    .question-top h2 { margin: 7px 0 0; font-size: clamp(1.2rem, 2.5vw, 1.65rem); line-height: 1.35; }
+    .live-timer { min-width: 116px; text-align: right; font-variant-numeric: tabular-nums; font-size: 1.65rem; font-weight: 1000; color: var(--active-color, var(--blue)); }
+    .live-timer small { display: block; margin-bottom: 3px; color: var(--muted); font-size: .61rem; letter-spacing: .12em; text-transform: uppercase; }
+    pre { margin: 0 0 19px; padding: 17px 19px; overflow: auto; color: #dff8ff; background: #030913; border: 1px solid rgba(26,200,255,.2); border-left: 3px solid var(--active-color, var(--blue)); border-radius: 11px; font: 600 1rem/1.55 "SFMono-Regular", Consolas, monospace; white-space: pre-wrap; }
+    .answers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .answer { min-height: 62px; display: flex; align-items: center; gap: 12px; padding: 12px 15px; text-align: left; border: 1px solid var(--border); border-radius: 12px; background: rgba(255,255,255,.045); cursor: pointer; transition: border-color .15s, transform .15s, background .15s; }
+    .answer:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--active-color, var(--blue)); background: rgba(255,255,255,.08); }
+    .answer:disabled { cursor: default; opacity: .72; }
+    .answer.correct { border-color: var(--green); background: rgba(85,240,154,.13); opacity: 1; }
+    .answer.wrong { border-color: var(--red); background: rgba(255,83,116,.13); opacity: 1; }
+    .key { flex: 0 0 30px; height: 30px; display: grid; place-items: center; border-radius: 7px; color: var(--muted); background: rgba(255,255,255,.08); font-weight: 900; font-size: .82rem; }
+    .shortcut-hint { margin: 15px 0 0; color: var(--muted); text-align: center; font-size: .76rem; }
+    .feedback { margin-top: 16px; padding: 15px 17px; border-radius: 12px; border: 1px solid var(--border); line-height: 1.5; }
+    .feedback.correct { background: rgba(85,240,154,.09); border-color: rgba(85,240,154,.45); }
+    .feedback.wrong { background: rgba(255,83,116,.09); border-color: rgba(255,83,116,.45); }
+    .feedback-title { font-weight: 1000; }
+    .feedback.correct .feedback-title { color: var(--green); } .feedback.wrong .feedback-title { color: var(--red); }
+    .feedback p { margin: 5px 0 13px; color: #c3d0df; }
+    .feedback-actions { display: flex; justify-content: flex-end; }
+
+    .results { padding: clamp(25px, 5vw, 50px); text-align: center; overflow: hidden; position: relative; }
+    .trophy { font-size: 4rem; animation: trophy 1.1s ease-in-out infinite alternate; filter: drop-shadow(0 0 20px #ffc857); }
+    @keyframes trophy { to { transform: translateY(-8px) rotate(4deg); } }
+    .results h1 { font-size: clamp(2.4rem, 7vw, 5.2rem); margin-top: 18px; }
+    .winner-copy { color: var(--muted); font-size: 1.1rem; margin: 14px 0 28px; }
+    .leaderboard { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; text-align: left; }
+    .result-card { --accent: var(--blue); border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: 15px; padding: 20px; background: rgba(255,255,255,.035); }
+    .result-card.p2 { --accent: var(--orange); }
+    .result-rank { color: var(--accent); font-size: .7rem; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+    .result-name { margin: 5px 0 16px; font-size: 1.35rem; font-weight: 1000; overflow-wrap: anywhere; }
+    .result-time { color: var(--accent); font: 1000 2rem/1 ui-monospace, monospace; }
+    .result-detail { margin-top: 14px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: var(--muted); font-size: .82rem; }
+    .result-detail strong { display: block; margin-top: 2px; color: var(--text); font-size: .95rem; }
+    .result-actions { display: flex; justify-content: center; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
+    .error { min-height: 20px; margin: 8px 0 0; color: var(--red); font-size: .83rem; }
+
+    @media (max-width: 720px) {
+      .app { width: min(100% - 20px, 1180px); padding-top: 15px; }
+      .topbar { margin-bottom: 14px; }
+      .setup-grid, .answers, .leaderboard { grid-template-columns: 1fr; }
+      .lane { grid-template-columns: 105px 1fr; min-height: 102px; }
+      .driver { padding: 10px; } .driver-stats { font-size: .68rem; }
+      .raceway { padding: 10px; }
+      .question-top { align-items: center; } .live-timer { font-size: 1.35rem; min-width: 95px; }
+      h1 { letter-spacing: -.055em; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>SPEED<em>-CODE</em></span></div>
+      <button id="soundToggle" class="sound-button" type="button" aria-pressed="false" title="Toggle sound">🔊 Sound on</button>
+    </header>
+
+    <section id="menuScreen" class="screen menu">
+      <div class="menu-card panel">
+        <div class="eyebrow">Local two-player coding race</div>
+        <h1>SPEED-CODE</h1>
+        <p class="tagline">Code Fast. Race Faster.</p>
+        <form id="setupForm" class="setup-grid">
+          <div class="field p1"><label for="player1Name">Player 1</label><input id="player1Name" maxlength="20" value="Player 1" autocomplete="off"></div>
+          <div class="field p2"><label for="player2Name">Player 2</label><input id="player2Name" maxlength="20" value="Player 2" autocomplete="off"></div>
+          <div class="field"><label for="languageSelect">Language</label><select id="languageSelect"><option value="python">Python</option></select></div>
+          <div class="field"><label for="roundSelect">Race length</label><select id="roundSelect"><option value="5">5 rounds — Sprint</option><option value="10">10 rounds — Circuit</option><option value="15">15 rounds — Grand Prix</option></select></div>
+          <button class="start-button" type="submit">Start Race →</button>
+        </form>
+        <div id="setupError" class="error" role="alert"></div>
+        <div class="rules"><span aria-hidden="true">🏁</span><div><strong>How to race:</strong> Take turns answering the same Python questions. Correct answers move your car; wrong answers leave it in place and add a 3-second penalty. Lowest adjusted time wins.</div></div>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen" hidden>
+      <div class="game-header"><div><div class="eyebrow">Python Sprint</div><div id="roundLabel" class="round-label">Round 1 of 5</div></div><div id="phaseLabel" class="phase-label">Get ready</div></div>
+      <div class="raceway panel">
+        <div class="lane p1">
+          <div class="driver"><div id="laneName0" class="driver-name">Player 1</div><div class="driver-stats"><span id="laneProgress0">0 / 5 checkpoints</span><br><strong id="laneTime0">0.00s</strong> · <span id="lanePenalty0">+0s penalty</span></div></div>
+          <div class="track"><div id="car0" class="car" aria-label="Player 1 car"><i class="car-body"></i><i class="car-window"></i><i class="wheel one"></i><i class="wheel two"></i></div><div class="finish"></div></div>
+        </div>
+        <div class="lane p2">
+          <div class="driver"><div id="laneName1" class="driver-name">Player 2</div><div class="driver-stats"><span id="laneProgress1">0 / 5 checkpoints</span><br><strong id="laneTime1">0.00s</strong> · <span id="lanePenalty1">+0s penalty</span></div></div>
+          <div class="track"><div id="car1" class="car" aria-label="Player 2 car"><i class="car-body"></i><i class="car-window"></i><i class="wheel one"></i><i class="wheel two"></i></div><div class="finish"></div></div>
+        </div>
+      </div>
+
+      <div id="playPanel" class="play-panel panel">
+        <div id="readyView" class="ready-view">
+          <div><div class="ready-icon">⌁</div><h2 id="readyTitle">Player 1 — Ready?</h2><p id="readyMessage">Your timer starts only when you press Start Turn.</p><button id="startTurnButton" class="primary-button" type="button">Start Turn</button></div>
+        </div>
+        <div id="questionView" hidden>
+          <div class="question-top"><div><div id="questionMeta" class="question-meta">Player 1 · Arithmetic</div><h2 id="questionPrompt">What does this code output?</h2></div><div id="liveTimer" class="live-timer"><small>Active time</small>0.00s</div></div>
+          <pre id="questionCode"><code>print(2 + 3)</code></pre>
+          <div id="answerGrid" class="answers"></div>
+          <p class="shortcut-hint">Press keys <strong>1–4</strong> to answer</p>
+          <div id="feedbackBox" class="feedback" hidden><div id="feedbackTitle" class="feedback-title"></div><p id="feedbackText"></p><div class="feedback-actions"><button id="continueButton" class="primary-button" type="button">Continue</button></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultsScreen" class="screen" hidden>
+      <div class="results panel"><div class="trophy" aria-hidden="true">🏆</div><div class="eyebrow">Official race results</div><h1 id="winnerTitle">Player 1 Wins!</h1><p id="winnerCopy" class="winner-copy">A lightning-fast finish.</p><div id="leaderboard" class="leaderboard"></div><div class="result-actions"><button id="rematchButton" class="primary-button" type="button">Race Again</button><button id="menuButton" class="secondary-button" type="button">Main Menu</button></div></div>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    // 1. GAME CONFIGURATION
+    const CONFIG = Object.freeze({
+      penaltySeconds: 3,
+      tieThresholdSeconds: 0.01,
+      supportedRounds: [5, 10, 15],
+      language: "python"
+    });
+
+    const PHASE = Object.freeze({ MENU: "menu", READY: "ready", ACTIVE: "active", FEEDBACK: "feedback", RESULTS: "results" });
+
+    // 2. QUESTION BANK
+    // Add new questions using this same schema. The validator below protects match setup.
+    const QUESTION_BANK = [
+      {id:"python_001",language:"python",difficulty:"easy",category:"arithmetic",prompt:"What does the following code output?",code:"print(2 + 3)",options:["4","5","6","23"],correctIndex:1,explanation:"The + operator adds 2 and 3, producing 5."},
+      {id:"python_002",language:"python",difficulty:"easy",category:"arithmetic",prompt:"What does the following code output?",code:"print(10 - 4)",options:["6","14","4","10"],correctIndex:0,explanation:"Subtracting 4 from 10 gives 6."},
+      {id:"python_003",language:"python",difficulty:"easy",category:"arithmetic",prompt:"What is printed?",code:"print(3 * 2)",options:["5","6","9","32"],correctIndex:1,explanation:"The * operator multiplies 3 by 2."},
+      {id:"python_004",language:"python",difficulty:"easy",category:"arithmetic",prompt:"What is printed?",code:"print(8 / 2)",options:["4","4.0","6","16"],correctIndex:1,explanation:"In Python 3, / returns a floating-point result: 4.0."},
+      {id:"python_005",language:"python",difficulty:"easy",category:"arithmetic",prompt:"What is the result of this expression?",code:"print(7 % 3)",options:["1","2","3","4"],correctIndex:0,explanation:"The % operator returns the remainder; 7 divided by 3 leaves 1."},
+      {id:"python_006",language:"python",difficulty:"easy",category:"variables",prompt:"What does this code print?",code:"score = 10\nprint(score)",options:["score","0","10","None"],correctIndex:2,explanation:"The variable score stores the integer 10."},
+      {id:"python_007",language:"python",difficulty:"easy",category:"variables",prompt:"What is printed?",code:"x = 4\nx = x + 1\nprint(x)",options:["4","5","1","x + 1"],correctIndex:1,explanation:"x starts at 4 and is reassigned to 5."},
+      {id:"python_008",language:"python",difficulty:"easy",category:"print",prompt:"Which function displays text in Python?",code:"# Choose the correct function",options:["show()","display()","print()","write()"],correctIndex:2,explanation:"Python's built-in print() function displays output."},
+      {id:"python_009",language:"python",difficulty:"easy",category:"strings",prompt:"What does this code output?",code:"print(\"Hi\" + \"!\")",options:["Hi!","Hi + !","Hi !","Error"],correctIndex:0,explanation:"The + operator joins (concatenates) the two strings."},
+      {id:"python_010",language:"python",difficulty:"easy",category:"strings",prompt:"What is printed?",code:"word = \"code\"\nprint(word.upper())",options:["code","Code","CODE","upper"],correctIndex:2,explanation:"upper() returns the string with every letter capitalized."},
+      {id:"python_011",language:"python",difficulty:"easy",category:"strings",prompt:"How many characters are in this string?",code:"print(len(\"race\"))",options:["3","4","5","race"],correctIndex:1,explanation:"The string 'race' contains four characters."},
+      {id:"python_012",language:"python",difficulty:"easy",category:"strings",prompt:"What does this code output?",code:"print(\"go\" * 2)",options:["go2","gogo","go go","Error"],correctIndex:1,explanation:"Multiplying a string by 2 repeats it twice."},
+      {id:"python_013",language:"python",difficulty:"easy",category:"lists",prompt:"Which value is a Python list?",code:"# Choose the list",options:["(1, 2)","{1, 2}","[1, 2]","\"1, 2\""],correctIndex:2,explanation:"Lists are written with square brackets."},
+      {id:"python_014",language:"python",difficulty:"easy",category:"lists",prompt:"What does this code output?",code:"cars = [\"red\", \"blue\"]\nprint(len(cars))",options:["1","2","3","cars"],correctIndex:1,explanation:"The list contains two items."},
+      {id:"python_015",language:"python",difficulty:"easy",category:"indexing",prompt:"What is printed?",code:"colors = [\"red\", \"blue\", \"green\"]\nprint(colors[0])",options:["red","blue","green","0"],correctIndex:0,explanation:"Python indexing starts at 0, so index 0 is 'red'."},
+      {id:"python_016",language:"python",difficulty:"easy",category:"indexing",prompt:"What does this code output?",code:"word = \"Python\"\nprint(word[1])",options:["P","y","t","Python"],correctIndex:1,explanation:"Index 1 is the second character, 'y'."},
+      {id:"python_017",language:"python",difficulty:"easy",category:"lists",prompt:"What is printed after append()?",code:"nums = [1, 2]\nnums.append(3)\nprint(nums)",options:["[1, 2]","[1, 2, 3]","[3, 1, 2]","3"],correctIndex:1,explanation:"append(3) adds 3 to the end of the list."},
+      {id:"python_018",language:"python",difficulty:"easy",category:"booleans",prompt:"What does this comparison produce?",code:"print(5 > 2)",options:["True","False","5","2"],correctIndex:0,explanation:"5 is greater than 2, so the comparison is True."},
+      {id:"python_019",language:"python",difficulty:"easy",category:"booleans",prompt:"What is printed?",code:"print(3 == 4)",options:["3","4","True","False"],correctIndex:3,explanation:"3 and 4 are not equal, so == produces False."},
+      {id:"python_020",language:"python",difficulty:"easy",category:"booleans",prompt:"What does this expression output?",code:"print(True and False)",options:["True","False","None","Error"],correctIndex:1,explanation:"and is True only when both values are True."},
+      {id:"python_021",language:"python",difficulty:"easy",category:"if statements",prompt:"What does the code print?",code:"age = 10\nif age > 5:\n    print(\"Go\")",options:["Go","10","Nothing","Error"],correctIndex:0,explanation:"10 is greater than 5, so the indented print runs."},
+      {id:"python_022",language:"python",difficulty:"easy",category:"if statements",prompt:"What is printed?",code:"speed = 2\nif speed > 5:\n    print(\"Fast\")\nelse:\n    print(\"Slow\")",options:["Fast","Slow","2","Nothing"],correctIndex:1,explanation:"2 is not greater than 5, so the else branch prints 'Slow'."},
+      {id:"python_023",language:"python",difficulty:"easy",category:"for loops",prompt:"How many times is 'Hi' printed?",code:"for i in range(3):\n    print(\"Hi\")",options:["1","2","3","4"],correctIndex:2,explanation:"range(3) supplies three values: 0, 1, and 2."},
+      {id:"python_024",language:"python",difficulty:"easy",category:"for loops",prompt:"What numbers are printed?",code:"for i in range(2):\n    print(i)",options:["0 then 1","1 then 2","0 then 2","2 only"],correctIndex:0,explanation:"range(2) produces 0 and 1."},
+      {id:"python_025",language:"python",difficulty:"easy",category:"built-ins",prompt:"What does this code output?",code:"print(max(2, 7))",options:["2","7","9","max"],correctIndex:1,explanation:"max() returns the largest supplied value."},
+      {id:"python_026",language:"python",difficulty:"easy",category:"built-ins",prompt:"What is printed?",code:"print(min(8, 3))",options:["3","5","8","11"],correctIndex:0,explanation:"min() returns the smallest supplied value."},
+      {id:"python_027",language:"python",difficulty:"easy",category:"built-ins",prompt:"What type of value does input() return?",code:"name = input(\"Name: \")",options:["Always an integer","A string","A list","A boolean"],correctIndex:1,explanation:"input() returns the user's entry as a string."},
+      {id:"python_028",language:"python",difficulty:"easy",category:"output prediction",prompt:"What is printed?",code:"a = 2\nb = 3\nprint(a + b)",options:["ab","23","5","6"],correctIndex:2,explanation:"a and b store numbers, so they are added to make 5."},
+      {id:"python_029",language:"python",difficulty:"easy",category:"output prediction",prompt:"What does this code output?",code:"name = \"Sam\"\nprint(\"Hi\", name)",options:["Hi Sam","HiSam","name","Hi name"],correctIndex:0,explanation:"print() separates its arguments with a space by default."},
+      {id:"python_030",language:"python",difficulty:"easy",category:"arithmetic",prompt:"Which operator raises a number to a power?",code:"print(2 ** 3)",options:["//","^^","**","%%"],correctIndex:2,explanation:"Python uses ** for exponentiation; 2 ** 3 is 8."},
+      {id:"python_031",language:"python",difficulty:"easy",category:"built-ins",prompt:"What does int() do here?",code:"print(int(\"5\"))",options:["Makes the integer 5","Makes the string '5'","Prints False","Causes an error"],correctIndex:0,explanation:"int() converts the numeric string to the integer 5."},
+      {id:"python_032",language:"python",difficulty:"easy",category:"lists",prompt:"What does this code print?",code:"items = []\nprint(len(items))",options:["0","1","[]","None"],correctIndex:0,explanation:"The empty list contains zero items."},
+      {id:"python_033",language:"python",difficulty:"easy",category:"booleans",prompt:"What is printed?",code:"print(not True)",options:["True","False","None","not"],correctIndex:1,explanation:"not reverses a Boolean value, so not True is False."},
+      {id:"python_034",language:"python",difficulty:"easy",category:"strings",prompt:"What does this code output?",code:"text = \"hello\"\nprint(text[0])",options:["h","e","hello","0"],correctIndex:0,explanation:"Index 0 selects the first character, 'h'."},
+      {id:"python_035",language:"python",difficulty:"easy",category:"for loops",prompt:"What is printed on the last loop?",code:"for n in [1, 2, 3]:\n    print(n)",options:["1","2","3","[1, 2, 3]"],correctIndex:2,explanation:"The loop visits each item in order, ending with 3."},
+      {id:"python_036",language:"python",difficulty:"easy",category:"if statements",prompt:"Which word starts an alternative branch?",code:"if ready:\n    print(\"Go\")\n____:\n    print(\"Wait\")",options:["otherwise","else","then","except"],correctIndex:1,explanation:"else starts the branch used when the if condition is false."}
+    ];
+
+    function validateQuestionBank(bank) {
+      const ids = new Set();
+      return bank.filter((q) => {
+        const valid = q && typeof q.id === "string" && !ids.has(q.id) && q.language &&
+          Array.isArray(q.options) && q.options.length === 4 && Number.isInteger(q.correctIndex) &&
+          q.correctIndex >= 0 && q.correctIndex < 4 && typeof q.options[q.correctIndex] === "string";
+        if (valid) ids.add(q.id);
+        else console.warn("Speed-Code ignored an invalid or duplicate question:", q?.id);
+        return valid;
+      });
+    }
+
+    const VALID_QUESTIONS = validateQuestionBank(QUESTION_BANK);
+
+    // 3. GAME STATE
+    let match = null;
+    let timerDisplayHandle = 0;
+    let audioContext = null;
+    let soundEnabled = true;
+
+    function freshPlayer(name) {
+      return { name, activeTimeMs: 0, turnStartedAt: null, correct: 0, incorrect: 0, completed: 0, answers: [] };
+    }
+
+    function createMatch(settings) {
+      const pool = VALID_QUESTIONS.filter((q) => q.language === settings.language);
+      if (settings.rounds > pool.length) throw new Error(`Only ${pool.length} valid ${settings.language} questions are available.`);
+      return {
+        settings,
+        questions: shuffle(pool).slice(0, settings.rounds),
+        players: [freshPlayer(settings.names[0]), freshPlayer(settings.names[1])],
+        roundIndex: 0,
+        playerIndex: 0,
+        phase: PHASE.READY,
+        submissionLocked: false
+      };
+    }
+
+    function shuffle(items) {
+      const result = [...items];
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    }
+
+    // 4. TIMER AND SCORING
+    function startPlayerTimer() {
+      const player = currentPlayer();
+      player.turnStartedAt = performance.now();
+      updateTimerDisplay();
+    }
+
+    function stopPlayerTimer() {
+      const player = currentPlayer();
+      if (player.turnStartedAt === null) return;
+      player.activeTimeMs += performance.now() - player.turnStartedAt;
+      player.turnStartedAt = null;
+      clearTimeout(timerDisplayHandle);
+      updateTimerDisplay();
+    }
+
+    function liveActiveMs(player) {
+      return player.activeTimeMs + (player.turnStartedAt === null ? 0 : performance.now() - player.turnStartedAt);
+    }
+
+    function adjustedTimeMs(player) { return player.activeTimeMs + player.incorrect * CONFIG.penaltySeconds * 1000; }
+    function formatTime(ms) { return `${(ms / 1000).toFixed(2)}s`; }
+
+    function updateTimerDisplay() {
+      if (!match) return;
+      const player = currentPlayer();
+      ui.liveTimer.innerHTML = `<small>Active time</small>${formatTime(liveActiveMs(player))}`;
+      renderLaneStats();
+      if (match.phase === PHASE.ACTIVE) {
+        clearTimeout(timerDisplayHandle);
+        timerDisplayHandle = window.setTimeout(updateTimerDisplay, 1000);
+      }
+    }
+
+    // 5. TURN MANAGEMENT
+    function beginMatch(settings) {
+      clearTimeout(timerDisplayHandle);
+      match = createMatch(settings);
+      showScreen("game");
+      renderRace();
+      showReady(false);
+    }
+
+    function startTurn() {
+      if (!match || match.phase !== PHASE.READY) return;
+      match.phase = PHASE.ACTIVE;
+      match.submissionLocked = false;
+      ui.readyView.hidden = true;
+      ui.questionView.hidden = false;
+      ui.feedbackBox.hidden = true;
+      renderQuestion();
+      startPlayerTimer();
+      playSound("start");
+    }
+
+    function submitAnswer(selectedIndex) {
+      if (!match || match.phase !== PHASE.ACTIVE || match.submissionLocked) return;
+      match.submissionLocked = true;
+      match.phase = PHASE.FEEDBACK;
+      stopPlayerTimer();
+
+      const player = currentPlayer();
+      const question = currentQuestion();
+      const correct = selectedIndex === question.correctIndex;
+      if (correct) player.completed += 1;
+      player[correct ? "correct" : "incorrect"] += 1;
+      player.answers.push({ questionId: question.id, selectedIndex, correct });
+
+      renderAnswerFeedback(selectedIndex, correct);
+      moveCar(match.playerIndex, correct);
+      renderLaneStats();
+      playSound(correct ? "correct" : "incorrect");
+    }
+
+    function continueRace() {
+      if (!match || match.phase !== PHASE.FEEDBACK) return;
+      if (match.playerIndex === 0) {
+        match.playerIndex = 1;
+        match.phase = PHASE.READY;
+        showReady(true);
+      } else if (match.roundIndex + 1 < match.settings.rounds) {
+        match.playerIndex = 0;
+        match.roundIndex += 1;
+        match.phase = PHASE.READY;
+        showReady(true);
+      } else {
+        finishMatch();
+      }
+    }
+
+    function finishMatch() {
+      clearTimeout(timerDisplayHandle);
+      match.players.forEach((player) => { player.turnStartedAt = null; });
+      match.phase = PHASE.RESULTS;
+      renderResults();
+      showScreen("results");
+      playSound("victory");
+    }
+
+    function currentPlayer() { return match.players[match.playerIndex]; }
+    function currentQuestion() { return match.questions[match.roundIndex]; }
+
+    // 6. RACING MECHANICS
+    function moveCar(playerIndex, turbo) {
+      renderCarPosition(playerIndex);
+      const car = ui.cars[playerIndex];
+      car.classList.toggle("turbo", turbo);
+      window.setTimeout(() => car.classList.remove("turbo"), 1000);
+    }
+
+    function renderCarPosition(index) {
+      const fraction = match.players[index].completed / match.settings.rounds;
+      ui.cars[index].style.left = `calc(${fraction * 100}% - ${fraction * 76}px)`;
+    }
+
+    // 7. UI RENDERING
+    const ui = {
+      menuScreen: document.querySelector("#menuScreen"), gameScreen: document.querySelector("#gameScreen"), resultsScreen: document.querySelector("#resultsScreen"),
+      setupForm: document.querySelector("#setupForm"), setupError: document.querySelector("#setupError"), player1Name: document.querySelector("#player1Name"), player2Name: document.querySelector("#player2Name"), roundSelect: document.querySelector("#roundSelect"), languageSelect: document.querySelector("#languageSelect"),
+      soundToggle: document.querySelector("#soundToggle"), roundLabel: document.querySelector("#roundLabel"), phaseLabel: document.querySelector("#phaseLabel"), playPanel: document.querySelector("#playPanel"), readyView: document.querySelector("#readyView"), readyTitle: document.querySelector("#readyTitle"), readyMessage: document.querySelector("#readyMessage"), startTurnButton: document.querySelector("#startTurnButton"),
+      questionView: document.querySelector("#questionView"), questionMeta: document.querySelector("#questionMeta"), questionPrompt: document.querySelector("#questionPrompt"), questionCode: document.querySelector("#questionCode"), liveTimer: document.querySelector("#liveTimer"), answerGrid: document.querySelector("#answerGrid"), feedbackBox: document.querySelector("#feedbackBox"), feedbackTitle: document.querySelector("#feedbackTitle"), feedbackText: document.querySelector("#feedbackText"), continueButton: document.querySelector("#continueButton"),
+      laneNames: [document.querySelector("#laneName0"), document.querySelector("#laneName1")], laneProgress: [document.querySelector("#laneProgress0"), document.querySelector("#laneProgress1")], laneTimes: [document.querySelector("#laneTime0"), document.querySelector("#laneTime1")], lanePenalties: [document.querySelector("#lanePenalty0"), document.querySelector("#lanePenalty1")], cars: [document.querySelector("#car0"), document.querySelector("#car1")],
+      winnerTitle: document.querySelector("#winnerTitle"), winnerCopy: document.querySelector("#winnerCopy"), leaderboard: document.querySelector("#leaderboard"), rematchButton: document.querySelector("#rematchButton"), menuButton: document.querySelector("#menuButton")
+    };
+
+    function showScreen(name) {
+      ui.menuScreen.hidden = name !== "menu";
+      ui.gameScreen.hidden = name !== "game";
+      ui.resultsScreen.hidden = name !== "results";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderRace() {
+      match.players.forEach((player, index) => { ui.laneNames[index].textContent = player.name; renderCarPosition(index); });
+      renderLaneStats();
+      renderRoundHeader();
+    }
+
+    function renderRoundHeader() {
+      ui.roundLabel.textContent = `Round ${match.roundIndex + 1} of ${match.settings.rounds}`;
+      ui.phaseLabel.textContent = `${currentPlayer().name}'s turn`;
+    }
+
+    function renderLaneStats() {
+      if (!match) return;
+      match.players.forEach((player, index) => {
+        ui.laneProgress[index].textContent = `${player.completed} / ${match.settings.rounds} checkpoints`;
+        ui.laneTimes[index].textContent = formatTime(liveActiveMs(player));
+        ui.lanePenalties[index].textContent = `+${player.incorrect * CONFIG.penaltySeconds}s penalty`;
+      });
+    }
+
+    function showReady(isHandoff) {
+      ui.questionView.hidden = true;
+      ui.readyView.hidden = false;
+      ui.playPanel.style.setProperty("--active-color", match.playerIndex === 0 ? "var(--blue)" : "var(--orange)");
+      renderRoundHeader();
+      ui.readyTitle.textContent = isHandoff ? `Pass to ${currentPlayer().name}` : `${currentPlayer().name} — Ready?`;
+      ui.readyMessage.textContent = isHandoff
+        ? `Question hidden. ${currentPlayer().name}, press Start Turn when you have the laptop.`
+        : "Your timer starts only when you press Start Turn.";
+      ui.startTurnButton.textContent = `${isHandoff ? "Start" : "Start"} Turn`;
+      ui.startTurnButton.focus();
+    }
+
+    function renderQuestion() {
+      const q = currentQuestion();
+      ui.playPanel.style.setProperty("--active-color", match.playerIndex === 0 ? "var(--blue)" : "var(--orange)");
+      ui.questionMeta.textContent = `${currentPlayer().name} · ${q.category}`;
+      ui.questionPrompt.textContent = q.prompt;
+      ui.questionCode.textContent = q.code;
+      ui.answerGrid.replaceChildren(...q.options.map((option, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "answer";
+        button.dataset.index = String(index);
+        button.innerHTML = `<span class="key">${index + 1}</span><span></span>`;
+        button.lastElementChild.textContent = option;
+        return button;
+      }));
+      ui.feedbackBox.hidden = true;
+      ui.liveTimer.innerHTML = `<small>Active time</small>${formatTime(currentPlayer().activeTimeMs)}`;
+    }
+
+    function renderAnswerFeedback(selectedIndex, correct) {
+      const q = currentQuestion();
+      const buttons = [...ui.answerGrid.querySelectorAll(".answer")];
+      buttons.forEach((button, index) => {
+        button.disabled = true;
+        if (index === q.correctIndex) button.classList.add("correct");
+        if (index === selectedIndex && !correct) button.classList.add("wrong");
+      });
+      ui.feedbackBox.hidden = false;
+      ui.feedbackBox.className = `feedback ${correct ? "correct" : "wrong"}`;
+      ui.feedbackTitle.textContent = correct ? "✓ Correct — Turbo boost!" : `✕ Incorrect — Car stays put · +${CONFIG.penaltySeconds}s penalty`;
+      ui.feedbackText.textContent = q.explanation;
+      const lastQuestion = match.playerIndex === 1 && match.roundIndex + 1 === match.settings.rounds;
+      ui.continueButton.textContent = lastQuestion ? "See Results" : match.playerIndex === 0 ? `Pass to ${match.players[1].name}` : "Next Round";
+      ui.continueButton.focus();
+    }
+
+    function renderResults() {
+      const [a, b] = match.players;
+      const difference = Math.abs(adjustedTimeMs(a) - adjustedTimeMs(b));
+      const tie = difference <= CONFIG.tieThresholdSeconds * 1000;
+      const winnerIndex = adjustedTimeMs(a) < adjustedTimeMs(b) ? 0 : 1;
+      ui.winnerTitle.textContent = tie ? "Photo Finish — Tie!" : `${match.players[winnerIndex].name} Wins!`;
+      ui.winnerCopy.textContent = tie ? "The adjusted times are within 0.01 seconds." : "Lowest adjusted completion time takes the trophy.";
+      const order = tie ? [0, 1] : [winnerIndex, 1 - winnerIndex];
+      ui.leaderboard.innerHTML = order.map((index, rank) => {
+        const p = match.players[index];
+        return `<article class="result-card ${index === 1 ? "p2" : ""}"><div class="result-rank">${tie ? "Tied" : `#${rank + 1}`}</div><div class="result-name"></div><div class="result-time">${formatTime(adjustedTimeMs(p))}</div><div class="result-detail"><span>Active time<strong>${formatTime(p.activeTimeMs)}</strong></span><span>Penalties<strong>+${p.incorrect * CONFIG.penaltySeconds}.00s</strong></span><span>Correct<strong>${p.correct}</strong></span><span>Incorrect<strong>${p.incorrect}</strong></span></div></article>`;
+      }).join("");
+      [...ui.leaderboard.querySelectorAll(".result-name")].forEach((el, position) => { el.textContent = match.players[order[position]].name; });
+    }
+
+    // Optional Web Audio effects; failures are safely ignored and never block play.
+    function tone(frequency, startOffset, duration, type = "sine", volume = .06) {
+      if (!soundEnabled) return;
+      try {
+        audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        oscillator.type = type; oscillator.frequency.value = frequency;
+        gain.gain.setValueAtTime(volume, audioContext.currentTime + startOffset);
+        gain.gain.exponentialRampToValueAtTime(.001, audioContext.currentTime + startOffset + duration);
+        oscillator.connect(gain).connect(audioContext.destination);
+        oscillator.start(audioContext.currentTime + startOffset);
+        oscillator.stop(audioContext.currentTime + startOffset + duration);
+      } catch (_) { /* Sound is enhancement-only. */ }
+    }
+
+    function playSound(kind) {
+      if (kind === "correct") { tone(520, 0, .13); tone(780, .11, .2); }
+      if (kind === "incorrect") { tone(180, 0, .24, "sawtooth", .045); }
+      if (kind === "start") { tone(120, 0, .08, "square", .025); tone(240, .07, .15, "square", .025); }
+      if (kind === "victory") [392, 523, 659, 784].forEach((f, i) => tone(f, i * .12, .3, "triangle", .05));
+    }
+
+    // 8. EVENT HANDLING
+    ui.setupForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const names = [ui.player1Name.value.trim() || "Player 1", ui.player2Name.value.trim() || "Player 2"];
+      const rounds = Number(ui.roundSelect.value);
+      ui.setupError.textContent = "";
+      try { beginMatch({ names, rounds, language: ui.languageSelect.value }); }
+      catch (error) { ui.setupError.textContent = error.message; }
+    });
+
+    ui.startTurnButton.addEventListener("click", startTurn);
+    ui.answerGrid.addEventListener("click", (event) => {
+      const button = event.target.closest(".answer");
+      if (button) submitAnswer(Number(button.dataset.index));
+    });
+    ui.continueButton.addEventListener("click", continueRace);
+    ui.rematchButton.addEventListener("click", () => beginMatch({ ...match.settings, names: [...match.settings.names] }));
+    ui.menuButton.addEventListener("click", () => { clearTimeout(timerDisplayHandle); match = null; showScreen("menu"); });
+    ui.soundToggle.addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
+      ui.soundToggle.textContent = soundEnabled ? "🔊 Sound on" : "🔇 Sound off";
+      ui.soundToggle.setAttribute("aria-pressed", String(!soundEnabled));
+    });
+    document.addEventListener("keydown", (event) => {
+      if (!match || match.phase !== PHASE.ACTIVE || event.repeat) return;
+      const index = Number(event.key) - 1;
+      if (index >= 0 && index <= 3) { event.preventDefault(); submitAnswer(index); }
+    });
+  </script>
+</body>
+</html>
